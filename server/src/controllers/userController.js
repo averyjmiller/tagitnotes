@@ -71,7 +71,7 @@ export const loginUser = async (req, res) => {
 
 export const getUserDetails = async (req, res) => {
     try {
-        const user = await User.findById(req.body._id);
+        const user = await User.findById(req.body.userId);
 
         if(!user) {
             return res.status(400).json({ error: 'Unable to find user' });
@@ -92,7 +92,7 @@ export const getUserDetails = async (req, res) => {
 
 export const updateUserDetails = async (req, res) => {
     try {
-        const user = await User.findById(req.body._id).select("+password");
+        const user = await User.findById(req.body.userId).select("+password");
 
         if(!user) {
             return res.status(400).json({ error: 'Unable to find user' });
@@ -106,22 +106,19 @@ export const updateUserDetails = async (req, res) => {
             lastName
         } = req.body;
 
-        const updates = {};
-
-        if(
-            (!username  || !username.trim())  &&
-            (!email     || !email.trim())     &&
-            (!password  || !password.trim())  &&
-            (!firstName || !firstName.trim()) &&
-            (!lastName  || !lastName.trim())
+        if((!username  || !username.trim())  &&
+           (!email     || !email.trim())     &&
+           (!password  || !password.trim())  &&
+           (!firstName || !firstName.trim()) &&
+           (!lastName  || !lastName.trim())
         ) return res.status(400).json({ error: 'Parameters are undefined' });
 
         if(username && username.trim()) {
-            updates.username = username;
+            user.username = username;
         }
 
         if(email && email.trim()) {
-            updates.email = email;
+            user.email = email;
         }
 
         if(password && password.trim()) {
@@ -131,29 +128,25 @@ export const updateUserDetails = async (req, res) => {
                 return res.status(400).json({ error: 'Cannot reuse the same password' });
             }
 
-            updates.password = password;
+            user.password = password;
         }
 
         if(firstName && firstName.trim()) {
-            updates.firstName = firstName;
+            user.firstName = firstName;
         }
 
         if(lastName && lastName.trim()) {
-            updates.lastName = lastName;
+            user.lastName = lastName;
         }
 
-        const updatedUser = await User.findByIdAndUpdate(user._id, {
-            $set: updates
-        }, {returnDocument: 'after'});
+        await user.save();
 
         return res.status(200).json({
             success: true,
             message: 'Updated user details',
-            user: safeUser(updatedUser)
+            user: safeUser(user)
         });
     } catch(err) {
-        console.error(err);
-
         if(err.name === 'ValidationError') {
             const message = Object.values(err.errors)
                 .map(e => e.message)
@@ -178,13 +171,13 @@ export const updateUserDetails = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        const user = await User.findById(req.body._id);
+        const user = await User.findById(req.body.userId);
 
         if(!user) {
             return res.status(400).json({ error: 'Unable to find user' });
         }
 
-        await User.deleteOne({ _id: req.body._id });
+        await User.deleteOne({ _id: req.body.userId });
 
         res.status(200).json({
             success: true,
