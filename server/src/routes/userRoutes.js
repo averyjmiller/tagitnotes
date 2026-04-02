@@ -13,7 +13,7 @@ import {
 router.post("/signup", signupUser);
 router.get("/login", loginUser);
 router.get("/userDetails", protect, getUserDetails);
-router.post("/updateUser", protect, updateUserDetails);
-router.post("/deleteUser", protect, deleteUser);
+router.patch("/updateUser", protect, updateUserDetails);
+router.delete("/deleteUser", protect, deleteUser);
 
 export default router;
