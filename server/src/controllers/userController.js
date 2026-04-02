@@ -106,48 +106,54 @@ export const updateUserDetails = async (req, res) => {
             lastName
         } = req.body;
 
+        const updates = {};
+
         if(
-            (username  === undefined || !username.trim())  &&
-            (email     === undefined || !email.trim())     &&
-            (password  === undefined || !password.trim())  &&
-            (firstName === undefined || !firstName.trim()) &&
-            (lastName  === undefined || !lastName.trim())
+            (!username  || !username.trim())  &&
+            (!email     || !email.trim())     &&
+            (!password  || !password.trim())  &&
+            (!firstName || !firstName.trim()) &&
+            (!lastName  || !lastName.trim())
         ) return res.status(400).json({ error: 'Parameters are undefined' });
 
-        if(username !== undefined && username.trim()) {
-            user.username = username;
+        if(username && username.trim()) {
+            updates.username = username;
         }
 
-        if(email !== undefined && email.trim()) {
-            user.email = email;
+        if(email && email.trim()) {
+            updates.email = email;
         }
 
-        if(password !== undefined && password.trim()) {
+        if(password && password.trim()) {
             const isMatch = await bcrypt.compare(password, user.password);
 
             if(isMatch) {
                 return res.status(400).json({ error: 'Cannot reuse the same password' });
             }
 
-            user.password = password;
+            updates.password = password;
         }
 
-        if(firstName !== undefined && firstName.trim()) {
-            user.firstName = firstName;
+        if(firstName && firstName.trim()) {
+            updates.firstName = firstName;
         }
 
-        if(lastName !== undefined && lastName.trim()) {
-            user.lastName = lastName;
+        if(lastName && lastName.trim()) {
+            updates.lastName = lastName;
         }
 
-        await user.save();
+        const updatedUser = await User.findByIdAndUpdate(user._id, {
+            $set: updates
+        }, {returnDocument: 'after'});
 
         return res.status(200).json({
             success: true,
             message: 'Updated user details',
-            user: safeUser(user)
+            user: safeUser(updatedUser)
         });
     } catch(err) {
+        console.error(err);
+
         if(err.name === 'ValidationError') {
             const message = Object.values(err.errors)
                 .map(e => e.message)
