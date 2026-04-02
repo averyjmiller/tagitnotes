@@ -9,6 +9,11 @@ const NoteSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     tags: [String],
     createdAt: {
         type: Date,
