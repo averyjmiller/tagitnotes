@@ -8,6 +8,25 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         trim: true
     },
+    email: {
+        type: String,
+        validate: [
+            {
+            validator: function(v) {
+                return /^\S+@\S+\.\S+$/.test(v);
+            },
+            message: props => `${props.value} is not a valid email`
+        },{
+            validator: async function(v) {
+                const existing = await mongoose.models.User.findOne({ email: v });
+                return (!existing || existing._id.toString() === this._id.toString());
+            },
+            message: 'Email already exists'
+        }],
+        required: [true, 'Please add an email'],
+        unique: true,
+        trim: true
+    },
     password: {
         type: String,
         required: [true, 'Please add a password'],
