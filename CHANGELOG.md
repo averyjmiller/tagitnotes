@@ -51,3 +51,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Patched a vulnerability where passwords weren't being hashed when updating user details
 - Fixed authentication issue where controllers were not using the user object sent from the JWT token
 - Fixed small bugs in the User Schema
+
+## [0.2.1] - 2026-04-03
+### Added
+- Added API documentation with working index
+- Added default schema type to content field in the Note schema
+### Fixed
+- Standardized tag type to accept only string arrays in the searchByTag controller
