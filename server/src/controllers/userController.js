@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { signToken } from '../middleware/auth.js';
+import Note from '../models/Note.js';
 
 function safeUser(user) {
     const { password, ...safeUser } = user.toObject();
@@ -71,11 +72,7 @@ export const loginUser = async (req, res) => {
 
 export const getUserDetails = async (req, res) => {
     try {
-        const user = await User.findById(req.body.userId);
-
-        if(!user) {
-            return res.status(400).json({ error: 'Unable to find user' });
-        }
+        const { user } = req;
 
         return res.status(200).json({
             success: true,
@@ -92,12 +89,7 @@ export const getUserDetails = async (req, res) => {
 
 export const updateUserDetails = async (req, res) => {
     try {
-        const user = await User.findById(req.body.userId).select("+password");
-
-        if(!user) {
-            return res.status(400).json({ error: 'Unable to find user' });
-        }
-
+        const { user } = req;
         const {
             username,
             email,
@@ -106,37 +98,25 @@ export const updateUserDetails = async (req, res) => {
             lastName
         } = req.body;
 
-        if((!username  || !username.trim())  &&
-           (!email     || !email.trim())     &&
-           (!password  || !password.trim())  &&
-           (!firstName || !firstName.trim()) &&
-           (!lastName  || !lastName.trim())
-        ) return res.status(400).json({ error: 'Parameters are undefined' });
-
-        if(username && username.trim()) {
-            user.username = username;
+        if(!username && !email && !password && !firstName && !lastName) {
+            return res.status(400).json({ error: 'Parameters are undefined' });
         }
 
-        if(email && email.trim()) {
-            user.email = email;
-        }
+        user.username = username ? username : user.username;
+        user.email = email ? email : user.email;
+        user.firstName = firstName ? firstName : user.firstName;
+        user.lastName = lastName ? lastName : user.lastName;
 
-        if(password && password.trim()) {
-            const isMatch = await bcrypt.compare(password, user.password);
+        if(password) {
+            const userWithPass = await User.findById(user._id).select("+password");
+            const oldPassword = userWithPass.password;
+            const isMatch = await bcrypt.compare(password, oldPassword);
 
             if(isMatch) {
                 return res.status(400).json({ error: 'Cannot reuse the same password' });
             }
 
             user.password = password;
-        }
-
-        if(firstName && firstName.trim()) {
-            user.firstName = firstName;
-        }
-
-        if(lastName && lastName.trim()) {
-            user.lastName = lastName;
         }
 
         await user.save();
@@ -171,17 +151,14 @@ export const updateUserDetails = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        const user = await User.findById(req.body.userId);
+        const { user } = req;
 
-        if(!user) {
-            return res.status(400).json({ error: 'Unable to find user' });
-        }
-
-        await User.deleteOne({ _id: req.body.userId });
+        await User.deleteOne({ _id: user._id });
+        await Note.deleteMany({ author: user._id });
 
         res.status(200).json({
             success: true,
-            message: 'User has been deleted',
+            message: 'User and associated notes have been deleted',
             user: safeUser(user)
         });
     } catch(err) {
