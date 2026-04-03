@@ -4,44 +4,50 @@ import bcrypt from 'bcrypt';
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: [true, 'Please add a username'],
+        required: [true, 'Username cannot be blank'],
         unique: true,
-        trim: true
+        trim: true,
+        match: [/^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._]+$/, 'Invalid username'],
+        minLength: [3, 'Username must be at least 3 characters'],
+        maxLength: [20, 'Username cannot be more than 20 characters']
     },
     email: {
         type: String,
         validate: [
             {
-            validator: function(v) {
-                return /^\S+@\S+\.\S+$/.test(v);
-            },
-            message: props => `${props.value} is not a valid email`
-        },{
             validator: async function(v) {
                 const existing = await mongoose.models.User.findOne({ email: v });
                 return (!existing || existing._id.toString() === this._id.toString());
             },
             message: 'Email already exists'
         }],
-        required: [true, 'Please add an email'],
+        required: [true, 'Email cannot be blank'],
         unique: true,
-        trim: true
+        trim: true,
+        match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email'],
+        minLength: [5, 'Email cannot be less than 5 characters'],
+        maxLength: [254, 'Email cannot be more than 254 characets']
     },
     password: {
         type: String,
-        required: [true, 'Please add a password'],
+        required: [true, 'Password cannot be blank'],
         minLength: [6, 'Password must be at least 6 characters'],
+        maxLength: [100, 'Password cannot be more than 100 characters'],
         select: false
     },
     firstName: {
         type: String,
-        required: [true, 'Please add a first name'],
-        trim: true
+        required: [true, 'First name cannot be blank'],
+        trim: true,
+        minLength: [1, 'First name must be at least 1 character'],
+        maxLength: [20, 'First name cannot be more than 20 characters']
     },
     lastName: {
         type: String,
-        required: [true, 'Please add a last name'],
-        trim: true
+        required: [true, 'Last name cannot be blank'],
+        trim: true,
+        minLength: [1, 'Last name must be at least 1 character'],
+        maxLength: [20, 'Last name cannot be more than 20 characters']
     },
     createdAt: {
         type: Date,
