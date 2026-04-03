@@ -38,3 +38,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - User profile update endpoint
 - Validation for email format and unique username/email
 - Account deletion
+
+## [0.2.0] - 2026-04-03
+### Added
+- Implemented Note api, including creating, reading, updating, and deleting notes
+- Added tag logic to Note models, including search by tag and displaying top 5 used tags by the user
+- Added validation to tags to normalize how tags are saved to the database
+- Added virtuals to the Note schema to display title and content previews for get requests
+### Fixed
+- User routes use proper HTTP methods now, including patch and delete
+- Refactored code to follow best practices
+- Patched a vulnerability where passwords weren't being hashed when updating user details
+- Fixed authentication issue where controllers were not using the user object sent from the JWT token
+- Fixed small bugs in the User Schema
