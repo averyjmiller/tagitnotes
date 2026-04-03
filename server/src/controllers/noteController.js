@@ -81,22 +81,14 @@ export const searchByTag = async (req, res) => {
         const { user } = req;
         const { tags } = req.body;
 
-        let lowerTags;
-
-        if(tags instanceof Array) {
-            lowerTags = tags
+        const modifiedTags = tags
                 .map(e => e.replaceAll(' ', ''))
                 .map(e => e.toLowerCase());
-        } else {
-            lowerTags = tags
-                .replaceAll(' ', '')
-                .toLowerCase();
-        }
 
         const notes = await Note.find({
             author: user, 
             tags: {
-                $all: lowerTags
+                $all: modifiedTags
         }});
         
         if(notes.length === 0) {
