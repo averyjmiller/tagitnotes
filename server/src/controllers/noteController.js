@@ -39,7 +39,7 @@ export const createNote = async (req, res) => {
 
 export const getNoteDetails = async (req, res) => {
     try {
-        const note = await Note.findById(req.body.noteId);
+        const note = await Note.findById(req.query.noteId);
         
         if(!note) {
             return res.status(400).json({ error: 'Unable to find note' });
@@ -61,7 +61,7 @@ export const getNoteDetails = async (req, res) => {
 export const getUserNotes = async (req, res) => {
     try {
         const { user } = req;
-        const notes = await Note.find({ author: user }).sort({ updatedAt: 'desc' });
+        const notes = await Note.find({ author: user }).sort({ updatedAt: 'desc' }).populate('author');
 
         return res.status(200).json({
             success: true,
@@ -79,7 +79,11 @@ export const getUserNotes = async (req, res) => {
 export const searchByTag = async (req, res) => {
     try {
         const { user } = req;
-        const { tags } = req.body;
+        let tags = req.query['tags[]'];
+
+        if(typeof tags === 'string') {
+            tags = [tags];
+        }
 
         const modifiedTags = tags
                 .map(e => e.replaceAll(' ', ''))
@@ -89,12 +93,15 @@ export const searchByTag = async (req, res) => {
             author: user, 
             tags: {
                 $all: modifiedTags
-        }});
+        }})
+            .sort({ updatedAt: 'desc' })
+            .populate('author');
         
         if(notes.length === 0) {
             return res.status(200).json({
                 success: false,
-                message: 'No notes were found with those tags'
+                message: 'No notes were found with those tags',
+                notes: []
             });
         }
 
@@ -104,6 +111,7 @@ export const searchByTag = async (req, res) => {
             notes
         });
     } catch(err) {
+        console.log(err);
         return res.status(500).json({ 
             message: 'Internal server error', 
             error: err.message 
@@ -196,13 +204,13 @@ export const updateNoteDetails = async (req, res) => {
 
 export const deleteNote = async (req, res) => {
     try {
-        const note = await Note.findById(req.body.noteId);
+        const note = await Note.findById(req.query.noteId);
 
         if(!note) {
             return res.status(400).json({ error: 'Unable to find note' });
         }
 
-        await Note.deleteOne({ _id: req.body.noteId });
+        await Note.deleteOne({ _id: note._id });
 
         res.status(200).json({
             success: true,
