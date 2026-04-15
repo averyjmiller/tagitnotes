@@ -43,16 +43,22 @@ export const signupUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.body.username }).select("+password");
+        const { email, password } = req.body;
 
-        if(!user) {
-            return res.status(400).json({ error: 'Username or password is incorrect' });
+        if(!email || !password) {
+            return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        const user = await User.findOne({ email: email }).select("+password");
+
+        if(!user) {
+            return res.status(400).json({ error: 'Email or password is incorrect' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if(!isMatch) {
-            return res.status(400).json({ error: 'Username or password is incorrect' });
+            return res.status(400).json({ error: 'Email or password is incorrect' });
         }
 
         const token = signToken(user);
@@ -91,18 +97,16 @@ export const updateUserDetails = async (req, res) => {
     try {
         const { user } = req;
         const {
-            username,
             email,
             password,
             firstName,
             lastName
         } = req.body;
 
-        if(!username && !email && !password && !firstName && !lastName) {
+        if(!email && !password && !firstName && !lastName) {
             return res.status(400).json({ error: 'Parameters are undefined' });
         }
 
-        user.username = username ? username : user.username;
         user.email = email ? email : user.email;
         user.firstName = firstName ? firstName : user.firstName;
         user.lastName = lastName ? lastName : user.lastName;
