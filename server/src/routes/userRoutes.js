@@ -10,10 +10,10 @@ import {
     deleteUser
 } from '../controllers/userController.js';
 
-router.get("/login", loginUser);
 router.get("/userDetails", protect, getUserDetails);
 
 router.post("/signup", signupUser);
+router.post("/login", loginUser);
 
 router.patch("/updateUser", protect, updateUserDetails);
 
