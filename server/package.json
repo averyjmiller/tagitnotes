@@ -1,6 +1,6 @@
 {
   "name": "tagitnotes",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Tag-it Notes: a full-stack note-taking app with tagging and filtering",
   "main": "src/server.js",
   "scripts": {

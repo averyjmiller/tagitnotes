@@ -58,3 +58,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Added default schema type to content field in the Note schema
 ### Fixed
 - Standardized tag type to accept only string arrays in the searchByTag controller
+
+## [0.3.0] - 2026-04-15
+### Added
+- Configured vite react settings and installed dependencies
+- Implemented basic frontend logic for signing up/logging in, creating, reading, updating, and deleting notes with simple UI/UX
+- Added frontend authentication using jwt-decode
+### Removed
+- Removed username field from user schema because it was unnecessary for the purpose of the app
+### Fixed
+- Fixed query controllers to use the req query attribute instead of body
+- Fixed a bug where note model wasnt populating with user model
+- Added typedef validation for searching by tags to fix invalid type errors
+- Changed login route to use post method instead of get
